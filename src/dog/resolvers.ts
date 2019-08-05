@@ -17,7 +17,6 @@ export default {
   },
   Dog: {
     breed(parent, _args, { dataSources }) {
-      console.log(parent);
       return dataSources.dogApi.getBreed({ breed: parent.breedName });
     }
   },
@@ -25,9 +24,7 @@ export default {
     breed(_parent, args, { dataSources }) {
       return dataSources.dogApi.getBreed({ breed: args.breed });
     },
-    breeds(_parent, args, z) {
-      console.log("z:", z);
-      const { dataSources } = z;
+    breeds(_parent, args, {dataSources}) {
       return dataSources.dogApi.getBreeds({ limit: args.limit });
     },
     dogs(_parent, args, { dataSources }) {

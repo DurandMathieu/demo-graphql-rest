@@ -29,11 +29,6 @@ const options = {
 const server = new ApolloServer(options);
 server.applyMiddleware({ app });
 
-const client = new ApolloClient({
-  link: createHttpLink({ uri: "http://localhost:4000/graphql", fetch }),
-  cache: new InMemoryCache()
-});
-
 const openApi = OpenAPI({
   schema,
   info: {
@@ -44,26 +39,13 @@ const openApi = OpenAPI({
 app.use(
   useSofa({
     schema,
-    async execute(args) {
-      console.log("exec", args.source);
-      client.query({
-        query: args.source
-      });
-      return null;
-    },
-    errorHandler(res: any, errors: ReadonlyArray<any>) {
-      console.log(errors);
-      res.status(500);
-      res.json(errors[0]);
-    },
-    onRoute(info) {
+    onRoute(info: any) {
       openApi.addRoute(info, {
         basePath: ""
       });
     }
   })
 );
-console.log(openApi.get());
 app.use("/", swaggerUi.serve, swaggerUi.setup(openApi.get()));
 
 app.listen(4000, () => {
