@@ -1,18 +1,7 @@
 const { ApolloServer } = require("apollo-server-express");
 const swaggerUi = require("swagger-ui-express");
 const express = require("express");
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { ApolloClient } from "apollo-client";
-import { createHttpLink } from "apollo-link-http";
-import fetch from "node-fetch";
 
-import {
-  convertNodeHttpToRequest,
-  HttpQueryError,
-  runHttpQuery
-} from "apollo-server-core";
-
-import { resolve } from "path";
 import { OpenAPI, useSofa } from "sofa-api";
 import getDataSources from "./data-sources";
 import schema from "./schema";
@@ -21,10 +10,14 @@ import winston from "winston";
 winston.level = "debug";
 winston.add(new winston.transports.Console());
 
+import { InMemoryLRUCache } from "apollo-server-caching";
+const cache = new InMemoryLRUCache(); // In order to share cache with Apollo Server
+
 const app = express();
 const options = {
   dataSources: getDataSources,
-  schema
+  schema,
+  cache
 };
 const server = new ApolloServer(options);
 server.applyMiddleware({ app });
@@ -39,7 +32,26 @@ const openApi = OpenAPI({
 app.use(
   useSofa({
     schema,
-    onRoute(info: any) {
+    context: ({ req }) => {
+      const dataSources = getDataSources() as any;
+      const context = { req, dataSources };
+      // This is what Apollo does internally
+      for (const dataSource of Object.values(dataSources) as any) {
+        if (dataSource.initialize) {
+          dataSource.initialize({
+            context,
+            cache
+          });
+        }
+      }
+      return context;
+    },
+    errorHandler(res: any, errors: ReadonlyArray<any>) {
+      console.log(errors);
+      res.status(500);
+      res.json(errors[0]);
+    },
+    onRoute(info) {
       openApi.addRoute(info, {
         basePath: ""
       });
