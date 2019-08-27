@@ -2,63 +2,109 @@ const { ApolloServer } = require("apollo-server-express");
 const swaggerUi = require("swagger-ui-express");
 const express = require("express");
 
-import { OpenAPI, useSofa } from "sofa-api";
-import getDataSources from "./data-sources";
+import { ApolloClient } from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import fetch from 'node-fetch';
+import { HttpLink } from 'apollo-link-http';
+import gql from "graphql-tag";
 import schema from "./schema";
+import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
-import winston from "winston";
-winston.level = "debug";
-winston.add(new winston.transports.Console());
-
-import { InMemoryLRUCache } from "apollo-server-caching";
-const cache = new InMemoryLRUCache(); // In order to share cache with Apollo Server
+const cache = new InMemoryCache();
+const link = new HttpLink({
+  uri: 'http://localhost:4000/graphql',
+  fetch
+})
+const client = new ApolloClient({
+  cache,
+  link,
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'ignore',
+    },
+    query: {
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'all',
+    },
+  }
+})
 
 const app = express();
 const options = {
-  dataSources: getDataSources,
-  schema,
-  cache
+  schema
 };
 const server = new ApolloServer(options);
 server.applyMiddleware({ app });
 
-const openApi = OpenAPI({
-  schema,
-  info: {
-    title: "Example API",
-    version: "3.0.0"
-  }
-});
-app.use(
-  useSofa({
-    schema,
-    context: ({ req }) => {
-      const dataSources = getDataSources() as any;
-      const context = { req, dataSources };
-      // This is what Apollo does internally
-      for (const dataSource of Object.values(dataSources) as any) {
-        if (dataSource.initialize) {
-          dataSource.initialize({
-            context,
-            cache
-          });
+
+app.get("/products/ppv/:id/policy", (req: any, res: any) => {
+  console.log('ppv policy');
+  client
+  .query({
+    query: gql`
+      query GetPpvProductPolicy {
+        ppvProduct(id:"423432") {
+          productCode,
+          status,
+          policy {
+            expiryDate,
+            effectiveDate,
+            renewal {
+              effectiveDate
+            }
+          }
         }
       }
-      return context;
-    },
-    errorHandler(res: any, errors: ReadonlyArray<any>) {
-      console.log(errors);
-      res.status(500);
-      res.json(errors[0]);
-    },
-    onRoute(info) {
-      openApi.addRoute(info, {
-        basePath: ""
-      });
-    }
+    `
   })
-);
-app.use("/", swaggerUi.serve, swaggerUi.setup(openApi.get()));
+  .then(result => {
+    console.log(result.data);
+    res.send(result.data.ppvProduct.policy);
+  });
+});
+
+app.get("/products/ppv/:id", (req: any, res: any) => {
+  console.log('ppv product');
+  client
+  .query({
+    query: gql`
+      query GetPpvProduct {
+        ppvProduct(id:"423432") {
+          productCode,
+          status,
+          make,
+          year,
+          model
+        }
+      }
+    `
+  })
+  .then(result => {
+    console.log(result.data);
+    res.send(result.data.ppvProduct);
+  });
+});
+
+
+// const openApi = OpenAPI({
+//   schema,
+//   info: {
+//     title: "Facade GEN API",
+//     version: "1.0.0"
+//   }
+// });
+// app.use(
+//   useSofa({
+//     schema,
+//     onRoute(info) {
+//       openApi.addRoute(info, {
+//         basePath: ""
+//       });
+//     }
+//   })
+// );
+// app.use("/", swaggerUi.serve, swaggerUi.setup(openApi.get()));
 
 app.listen(4000, () => {
   const url = `http://localhost:${4000}`;

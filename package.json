@@ -38,6 +38,7 @@
     "express": "^4.17.1",
     "graphql": "^14.1.1",
     "graphql-import": "^0.7.1",
+    "graphql-iso-date": "^3.6.1",
     "merge-graphql-schemas": "^1.5.8",
     "node-fetch": "^2.6.0",
     "sofa-api": "^0.4.0",

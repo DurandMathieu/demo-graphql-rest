@@ -6,49 +6,76 @@ export type Maybe<T> = T | null;
 // ====================================================
 
 export interface Query {
-  breed?: Maybe<Breed>;
-
-  breeds?: Maybe<Breed[]>;
-
-  dogs?: Maybe<Dog[]>;
+  ppvProduct: PpvProduct;
 }
 
-export interface Breed {
-  name: string;
+export interface PpvProduct {
+  productCode: string;
 
-  howManyDogs: string;
+  make: string;
 
-  dogs?: Maybe<Dog[]>;
+  model: string;
+
+  year: number;
+
+  status: string;
+
+  policy?: Maybe<Policy>;
+
+  storages?: Maybe<(Maybe<Storage>)[]>;
 }
 
-export interface Dog {
-  breed?: Maybe<Breed>;
+export interface Policy {
+  id: string;
 
-  imageUrl: string;
+  effectiveDate: string;
+
+  expiryDate?: Maybe<string>;
+
+  renewal?: Maybe<PolicyRenewal>;
+}
+
+export interface PolicyRenewal {
+  effectiveDate: string;
+}
+
+export interface Storage {
+  effectiveDate: string;
+
+  expiryDate?: Maybe<string>;
+}
+
+export interface Role {
+  type: string;
+
+  person?: Maybe<Person>;
+
+  attributes?: Maybe<Attribute[]>;
+}
+
+export interface Person {
+  id: string;
+
+  firstName: string;
+
+  lastName: string;
+}
+
+export interface Attribute {
+  key: string;
+
+  value: string;
 }
 
 // ====================================================
 // Arguments
 // ====================================================
 
-export interface BreedQueryArgs {
-  breed: string;
-}
-export interface BreedsQueryArgs {
-  limit?: Maybe<number>;
-}
-export interface DogsQueryArgs {
-  breed: string;
-
-  limit?: Maybe<number>;
-}
-export interface DogsBreedArgs {
-  limit?: Maybe<number>;
+export interface PpvProductQueryArgs {
+  id: string;
 }
 
 import { GraphQLResolveInfo } from "graphql";
-
-import { IDog } from "./dog/data-source";
 
 import { IContext } from "./context";
 
@@ -103,87 +130,204 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = IContext, TypeParent = {}> {
-    breed?: BreedResolver<Maybe<Breed>, TypeParent, Context>;
-
-    breeds?: BreedsResolver<Maybe<Breed[]>, TypeParent, Context>;
-
-    dogs?: DogsResolver<Maybe<IDog[]>, TypeParent, Context>;
+    ppvProduct?: PpvProductResolver<PpvProduct, TypeParent, Context>;
   }
 
-  export type BreedResolver<
-    R = Maybe<Breed>,
+  export type PpvProductResolver<
+    R = PpvProduct,
     Parent = {},
     Context = IContext
-  > = Resolver<R, Parent, Context, BreedArgs>;
-  export interface BreedArgs {
-    breed: string;
-  }
-
-  export type BreedsResolver<
-    R = Maybe<Breed[]>,
-    Parent = {},
-    Context = IContext
-  > = Resolver<R, Parent, Context, BreedsArgs>;
-  export interface BreedsArgs {
-    limit?: Maybe<number>;
-  }
-
-  export type DogsResolver<
-    R = Maybe<IDog[]>,
-    Parent = {},
-    Context = IContext
-  > = Resolver<R, Parent, Context, DogsArgs>;
-  export interface DogsArgs {
-    breed: string;
-
-    limit?: Maybe<number>;
+  > = Resolver<R, Parent, Context, PpvProductArgs>;
+  export interface PpvProductArgs {
+    id: string;
   }
 }
 
-export namespace BreedResolvers {
-  export interface Resolvers<Context = IContext, TypeParent = Breed> {
-    name?: NameResolver<string, TypeParent, Context>;
+export namespace PpvProductResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = PpvProduct> {
+    productCode?: ProductCodeResolver<string, TypeParent, Context>;
 
-    howManyDogs?: HowManyDogsResolver<string, TypeParent, Context>;
+    make?: MakeResolver<string, TypeParent, Context>;
 
-    dogs?: DogsResolver<Maybe<IDog[]>, TypeParent, Context>;
+    model?: ModelResolver<string, TypeParent, Context>;
+
+    year?: YearResolver<number, TypeParent, Context>;
+
+    status?: StatusResolver<string, TypeParent, Context>;
+
+    policy?: PolicyResolver<Maybe<Policy>, TypeParent, Context>;
+
+    storages?: StoragesResolver<Maybe<(Maybe<Storage>)[]>, TypeParent, Context>;
   }
 
-  export type NameResolver<
+  export type ProductCodeResolver<
     R = string,
-    Parent = Breed,
+    Parent = PpvProduct,
     Context = IContext
   > = Resolver<R, Parent, Context>;
-  export type HowManyDogsResolver<
+  export type MakeResolver<
     R = string,
-    Parent = Breed,
+    Parent = PpvProduct,
     Context = IContext
   > = Resolver<R, Parent, Context>;
-  export type DogsResolver<
-    R = Maybe<IDog[]>,
-    Parent = Breed,
+  export type ModelResolver<
+    R = string,
+    Parent = PpvProduct,
     Context = IContext
-  > = Resolver<R, Parent, Context, DogsArgs>;
-  export interface DogsArgs {
-    limit?: Maybe<number>;
-  }
+  > = Resolver<R, Parent, Context>;
+  export type YearResolver<
+    R = number,
+    Parent = PpvProduct,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type StatusResolver<
+    R = string,
+    Parent = PpvProduct,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type PolicyResolver<
+    R = Maybe<Policy>,
+    Parent = PpvProduct,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type StoragesResolver<
+    R = Maybe<(Maybe<Storage>)[]>,
+    Parent = PpvProduct,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
 }
 
-export namespace DogResolvers {
-  export interface Resolvers<Context = IContext, TypeParent = IDog> {
-    breed?: BreedResolver<Maybe<Breed>, TypeParent, Context>;
+export namespace PolicyResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = Policy> {
+    id?: IdResolver<string, TypeParent, Context>;
 
-    imageUrl?: ImageUrlResolver<string, TypeParent, Context>;
+    effectiveDate?: EffectiveDateResolver<string, TypeParent, Context>;
+
+    expiryDate?: ExpiryDateResolver<Maybe<string>, TypeParent, Context>;
+
+    renewal?: RenewalResolver<Maybe<PolicyRenewal>, TypeParent, Context>;
   }
 
-  export type BreedResolver<
-    R = Maybe<Breed>,
-    Parent = IDog,
+  export type IdResolver<
+    R = string,
+    Parent = Policy,
     Context = IContext
   > = Resolver<R, Parent, Context>;
-  export type ImageUrlResolver<
+  export type EffectiveDateResolver<
     R = string,
-    Parent = IDog,
+    Parent = Policy,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type ExpiryDateResolver<
+    R = Maybe<string>,
+    Parent = Policy,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type RenewalResolver<
+    R = Maybe<PolicyRenewal>,
+    Parent = Policy,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PolicyRenewalResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = PolicyRenewal> {
+    effectiveDate?: EffectiveDateResolver<string, TypeParent, Context>;
+  }
+
+  export type EffectiveDateResolver<
+    R = string,
+    Parent = PolicyRenewal,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace StorageResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = Storage> {
+    effectiveDate?: EffectiveDateResolver<string, TypeParent, Context>;
+
+    expiryDate?: ExpiryDateResolver<Maybe<string>, TypeParent, Context>;
+  }
+
+  export type EffectiveDateResolver<
+    R = string,
+    Parent = Storage,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type ExpiryDateResolver<
+    R = Maybe<string>,
+    Parent = Storage,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace RoleResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = Role> {
+    type?: TypeResolver<string, TypeParent, Context>;
+
+    person?: PersonResolver<Maybe<Person>, TypeParent, Context>;
+
+    attributes?: AttributesResolver<Maybe<Attribute[]>, TypeParent, Context>;
+  }
+
+  export type TypeResolver<
+    R = string,
+    Parent = Role,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type PersonResolver<
+    R = Maybe<Person>,
+    Parent = Role,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type AttributesResolver<
+    R = Maybe<Attribute[]>,
+    Parent = Role,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PersonResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = Person> {
+    id?: IdResolver<string, TypeParent, Context>;
+
+    firstName?: FirstNameResolver<string, TypeParent, Context>;
+
+    lastName?: LastNameResolver<string, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string,
+    Parent = Person,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type FirstNameResolver<
+    R = string,
+    Parent = Person,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type LastNameResolver<
+    R = string,
+    Parent = Person,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AttributeResolvers {
+  export interface Resolvers<Context = IContext, TypeParent = Attribute> {
+    key?: KeyResolver<string, TypeParent, Context>;
+
+    value?: ValueResolver<string, TypeParent, Context>;
+  }
+
+  export type KeyResolver<
+    R = string,
+    Parent = Attribute,
+    Context = IContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = string,
+    Parent = Attribute,
     Context = IContext
   > = Resolver<R, Parent, Context>;
 }
@@ -223,8 +367,13 @@ export interface DeprecatedDirectiveArgs {
 
 export interface IResolvers<Context = IContext> {
   Query?: QueryResolvers.Resolvers<Context>;
-  Breed?: BreedResolvers.Resolvers<Context>;
-  Dog?: DogResolvers.Resolvers<Context>;
+  PpvProduct?: PpvProductResolvers.Resolvers<Context>;
+  Policy?: PolicyResolvers.Resolvers<Context>;
+  PolicyRenewal?: PolicyRenewalResolvers.Resolvers<Context>;
+  Storage?: StorageResolvers.Resolvers<Context>;
+  Role?: RoleResolvers.Resolvers<Context>;
+  Person?: PersonResolvers.Resolvers<Context>;
+  Attribute?: AttributeResolvers.Resolvers<Context>;
 }
 
 export interface IDirectiveResolvers<Result> {

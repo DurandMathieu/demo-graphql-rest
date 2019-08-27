@@ -4,6 +4,6 @@
  * Otherwise type generation will fail when the previous types are incorrect.
  */
 
-import dogTypeDefs from "./dog/type.schema";
+import facadeGenTypeDefs from "./facade-gen/type.schema";
 
-export default [dogTypeDefs];
+export default [facadeGenTypeDefs];

@@ -1,3 +1,3 @@
-import dogResolvers from "./dog/resolvers";
+import facadeGenResolvers from "./facade-gen/resolvers";
 
-export default [dogResolvers];
+export default [facadeGenResolvers];
